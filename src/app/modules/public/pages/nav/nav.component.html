@@ -1,0 +1,76 @@
+<div class="bg-black fixed top-0 right-0 left-0 z-10">
+
+    <div class="grid grid-rows-2 grid-cols-7">
+
+        <div class="col-start-1 col-end-2 sm:row-start-1 sm:row-end-3 row-start-1 row-end-2 flex justify-center items-center">
+            <img class="lg:w-14 lg:h-14 my-2 w-8 h-8" src="assets/img/fibertel.png" alt="">
+        </div>
+
+        <div class="sm:col-start-2 sm:col-end-6 col-start-1 col-end-8 sm:row-start-1 sm:row-end-3 row-start-2 row-end-3 content-center mx-5 sm:mx-0">
+            <div class="flex sm:py-1 sm:my-2 px-5 py-1 rounded-full w-full bg-white">
+                <input #inputElement type="text" placeholder="¿QUE DESEA BUSCAR?" class="md:text-base text-sm text-black w-full outline-none bg-transparent input"  (input)="onSearchInputChange($event)">
+                <button (click)="limpiarInput()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sm:w-8 sm:h-8 w-6 h-6" viewBox="0 -960 960 960" fill="black">
+                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="sm:col-start-6 sm:col-end-8 col-start-5 col-end-8 sm:row-start-1 sm:row-end-3 row-start-1 row-end-2 flex items-center justify-around ">
+
+            <a href="" class="text-white mx-2">
+                <p class="bg-blue-500 lg:px-4 lg:py-1  px-2 py-1 roboto-bold text-sm lg:text-xl">SERVICIOS</p>
+            </a>
+
+            <a href="#">
+                <img class="2xl:w-12 2xl:h-10 lg:w-10 lg:h-8 md:8 md:6 w-7 h-6" src="assets/img/rastreo.png" alt="">
+            </a>
+
+            <a routerLink="recorrido/carrito">
+                <svg xmlns="http://www.w3.org/2000/svg" class="2xl:w-12 2xl:h-10 lg:w-10 lg:h-8 md:8 md:6 w-7 h-6 fill-slate-50 stroke-2" viewBox="0 -960 960 960"><path d="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z"/></svg>
+            </a>
+        </div>
+       
+    </div>   
+</div>
+@switch (CargaDatos) {
+    @case ("none") {
+
+    }
+    @case ("loading") {
+        <div class="fixed top-14 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center" (click)="cerrarPopUp($event)">
+            <div class="bg-white rounded-lg p-4 w-1/2 h-1/2 overflow-x-auto" (click)="$event.stopPropagation()">
+                <p>Tenga paciencia estamos buscando sus productos</p>
+            </div>
+        </div>
+    }
+    @case ("done") {
+        <div class="fixed top-14 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center" (click)="cerrarPopUp($event)">
+            <div class="bg-white rounded-lg p-4 w-1/2 h-1/2 overflow-x-auto" (click)="$event.stopPropagation()">
+                <div class="bg-white flex-col rounded-lg justify-center items-center">
+                    <div *ngFor="let producto of Productos" class="flex justify-center rounded-xl hover:bg-sky-500 group py-7 px-4 w-full" routerLink="producto/{{ producto.idProducto }}">
+                        <img src="{{ producto.imagen01}}" alt=" imagen">
+                        <p class="group-hover:text-white">{{ producto.productoNombre}}</p>
+                        <p class="group-hover:text-white">Precio: </p>
+                        @if(producto.precioOferta > 0){
+                            <p class="group-hover:text-white">{{ producto.precioOferta }}</p>
+                        }@else{
+                            <p class="group-hover:text-white">{{ producto.precio }}</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @case ("error") {
+        <div class="fixed top-14 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center" (click)="cerrarPopUp($event)">
+            <div class="bg-white rounded-lg p-4 w-1/2 h-1/2 flex justify-center items-center" (click)="$event.stopPropagation()">
+                <p class="roboto-bold text-xl">No se encuentra el producto</p>
+            </div>
+        </div>
+    }
+} 
+<section>
+    <router-outlet/>
+</section>
