@@ -18,6 +18,7 @@ import { TerminosComponent } from './pages/terminos/terminos.component';
 import { PublicRoutingModule } from './public-routing.module';
 import { FormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
+import { CookieService } from 'ngx-cookie-service';
 
 
 
@@ -46,7 +47,7 @@ import { provideHttpClient } from '@angular/common/http';
     PublicRoutingModule,
   ],
   providers: [
-    provideHttpClient() 
+    provideHttpClient(),
   ]
 })
 export class PublicModule { }

@@ -1,7 +1,9 @@
+// cart.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CarritoService } from '../../../../shared/services/carrito.service';
 import { ProductoService } from '../../../../shared/services/producto.service';
 import { Producto } from '../../../../shared/models/producto';
+import { IndexedDBService } from '../../../../shared/services/indexed-db.service';
 
 @Component({
   selector: 'app-cart',
@@ -15,12 +17,13 @@ export class CartComponent implements OnInit {
 
   constructor(
     private carritoService: CarritoService,
-    private productoService: ProductoService
+    private productoService: ProductoService,
+    private indexedDBService: IndexedDBService
   ) {}
 
   ngOnInit(): void {
     this.carritoIds = this.carritoService.getCarritoIds();
-    this.cargarCantidadesDesdeStorage();
+    this.cargarCantidadesDesdeIndexedDB();
     this.cargarProductos();
   }
 
@@ -30,7 +33,9 @@ export class CartComponent implements OnInit {
       this.productoService.getProductoById(id).subscribe({
         next: (producto: Producto) => {
           this.productos.push(producto);
-          this.cantidades[id] = this.cantidades[id] || 1;
+          if (!(id in this.cantidades)) {
+            this.cantidades[id] = 1;
+          }
         },
         error: () => {
           console.error('Error al cargar el producto con ID:', id);
@@ -39,29 +44,22 @@ export class CartComponent implements OnInit {
     }
   }
 
-  cargarCantidadesDesdeStorage(): void {
-    try {
-      const cantidadesGuardadas = localStorage.getItem('cantidades');
-      if (cantidadesGuardadas) {
-        this.cantidades = JSON.parse(cantidadesGuardadas);
+  cargarCantidadesDesdeIndexedDB(): void {
+    this.indexedDBService.get('cantidades').then(cantidades => {
+      if (cantidades) {
+        this.cantidades = cantidades;
       }
-    } catch (error) {
-      console.error('Error al cargar las cantidades desde localStorage:', error);
-    }
+    });
   }
 
-  guardarCantidadesEnStorage(): void {
-    try {
-      localStorage.setItem('cantidades', JSON.stringify(this.cantidades));
-      this.guardarTotalEnStorage();
-    } catch (error) {
-      console.error('Error al guardar las cantidades en localStorage:', error);
-    }
+  guardarCantidadesEnIndexedDB(): void {
+    this.indexedDBService.set('cantidades', this.cantidades);
+    this.guardarTotalEnIndexedDB();
   }
 
-  guardarTotalEnStorage(): void {
+  guardarTotalEnIndexedDB(): void {
     const total = this.calcularTotal();
-    localStorage.setItem('totalCarrito', total);
+    this.indexedDBService.set('totalCarrito', total);
   }
 
   calcularTotal(): string {
@@ -80,22 +78,21 @@ export class CartComponent implements OnInit {
     this.carritoIds = this.carritoIds.filter(id => id !== productoId);
     delete this.cantidades[productoId];
     this.carritoService.setCarritoIds(this.carritoIds);
-    localStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
-    this.guardarCantidadesEnStorage();
+    this.guardarCantidadesEnIndexedDB();
     this.cargarProductos();
   }
 
-  mas(productoId: string): void {
+  mas(productoId: string) {
     if (this.cantidades[productoId] < 7) {
       this.cantidades[productoId]++;
-      this.guardarCantidadesEnStorage();
+      this.guardarCantidadesEnIndexedDB(); // Add this line to save the quantities to IndexedDB
     }
   }
 
-  menos(productoId: string): void {
+  menos(productoId: string) {
     if (this.cantidades[productoId] > 1) {
       this.cantidades[productoId]--;
-      this.guardarCantidadesEnStorage();
+      this.guardarCantidadesEnIndexedDB(); // Add this line to save the quantities to IndexedDB
     }
   }
 }

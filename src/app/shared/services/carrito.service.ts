@@ -7,17 +7,18 @@ export class CarritoService {
   private carritoIds: string[] = [];
 
   constructor() {
-    this.cargarCarrito(); // Cargar el carrito desde Local Storage al iniciar el servicio
+    this.cargarCarrito(); // Cargar el carrito desde sessionStorage al iniciar el servicio
   }
 
-  // Cargar los IDs desde Local Storage
+  // Cargar los IDs desde sessionStorage
   private cargarCarrito(): void {
     try {
-      const ids = localStorage.getItem('carritoIds');
+      const ids = sessionStorage.getItem('carritoIds');
       this.carritoIds = ids ? JSON.parse(ids) : [];
+      console.log('Carrito cargado:', this.carritoIds);
     } catch (error) {
-      console.error('Error al cargar el carrito desde localStorage:', error);
-      this.carritoIds = []; // Reiniciar a un array vacío en caso de error
+      console.error('Error al cargar el carrito desde sessionStorage:', error);
+      this.carritoIds = []; // Resetea el array en caso de error
     }
   }
 
@@ -28,24 +29,20 @@ export class CarritoService {
 
   // Añadir un ID al carrito
   agregarAlCarrito(id: string): void {
+    console.log('Agregando al carrito ID:', id);
     if (!this.carritoIds.includes(id)) {
       this.carritoIds.push(id);
-      this.guardarCarritoEnStorage();
+      sessionStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
+      console.log('Carrito actualizado:', this.carritoIds);
+    } else {
+      console.warn(`El ID ${id} ya está en el carrito.`);
     }
   }
 
-  // Establecer los IDs del carrito
+  // Establecer IDs en el carrito
   setCarritoIds(ids: string[]): void {
-    this.carritoIds = ids; // Actualizar el array local
-    this.guardarCarritoEnStorage();
-  }
-
-  // Guardar el carrito en Local Storage
-  private guardarCarritoEnStorage(): void {
-    try {
-      localStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
-    } catch (error) {
-      console.error('Error al guardar el carrito en localStorage:', error);
-    }
+    this.carritoIds = ids;
+    sessionStorage.setItem('carritoIds', JSON.stringify(ids));
+    console.log('Carrito establecido:', this.carritoIds);
   }
 }
