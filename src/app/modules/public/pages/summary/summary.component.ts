@@ -27,9 +27,13 @@ export class SummaryComponent implements OnInit {
   }
 
   cargarCantidadesDesdeStorage(): void {
-    const cantidadesGuardadas = localStorage.getItem('cantidades');
-    if (cantidadesGuardadas) {
-      this.cantidades = JSON.parse(cantidadesGuardadas);
+    try {
+      const cantidadesGuardadas = localStorage.getItem('cantidades');
+      if (cantidadesGuardadas) {
+        this.cantidades = JSON.parse(cantidadesGuardadas);
+      }
+    } catch (error) {
+      console.error('Error al cargar las cantidades desde localStorage:', error);
     }
   }
 
@@ -37,7 +41,7 @@ export class SummaryComponent implements OnInit {
     this.cargaDatos = 'loading';
     this.productos = [];
 
-    const productRequests = this.carritoIds.map(id => 
+    const productRequests = this.carritoIds.map(id =>
       this.productoService.getProductoById(id).toPromise()
     );
 
@@ -53,9 +57,11 @@ export class SummaryComponent implements OnInit {
         this.cargaDatos = 'error';
       });
   }
+
   calcularTotalProductos(): number {
     return Object.values(this.cantidades).reduce((total, cantidad) => total + cantidad, 0);
-}
+  }
+
   calcularTotal(): void {
     this.total = this.productos.reduce((total, producto) => {
       const cantidad = this.cantidades[producto.idProducto.toString()] || 1; // Se asegura de que la cantidad sea al menos 1

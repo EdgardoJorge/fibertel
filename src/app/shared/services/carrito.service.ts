@@ -12,8 +12,13 @@ export class CarritoService {
 
   // Cargar los IDs desde Local Storage
   private cargarCarrito(): void {
-    const ids = localStorage.getItem('carritoIds');
-    this.carritoIds = ids ? JSON.parse(ids) : [];
+    try {
+      const ids = localStorage.getItem('carritoIds');
+      this.carritoIds = ids ? JSON.parse(ids) : [];
+    } catch (error) {
+      console.error('Error al cargar el carrito desde localStorage:', error);
+      this.carritoIds = []; // Reiniciar a un array vacío en caso de error
+    }
   }
 
   // Obtener los IDs del carrito
@@ -25,12 +30,22 @@ export class CarritoService {
   agregarAlCarrito(id: string): void {
     if (!this.carritoIds.includes(id)) {
       this.carritoIds.push(id);
-      localStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
+      this.guardarCarritoEnStorage();
     }
   }
-  setCarritoIds(ids: string[]): void {
-    localStorage.setItem('carritoIds', JSON.stringify(ids));
-}
 
-  
+  // Establecer los IDs del carrito
+  setCarritoIds(ids: string[]): void {
+    this.carritoIds = ids; // Actualizar el array local
+    this.guardarCarritoEnStorage();
+  }
+
+  // Guardar el carrito en Local Storage
+  private guardarCarritoEnStorage(): void {
+    try {
+      localStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
+    } catch (error) {
+      console.error('Error al guardar el carrito en localStorage:', error);
+    }
+  }
 }
