@@ -30,16 +30,16 @@ export class SummaryComponent implements OnInit {
   }
 
   cargarCantidadesDesdeIndexedDB(): void {
-    this.indexedDBService.get('cantidad').then(cantidad => {
-      if (cantidad) {
-        this.cantidades = cantidad;
-        console.log('Cantidades cargadas desde IndexedDB:', this.cantidades); // Add this line for debugging
-      } else {
-        console.log('No hay cantidades en IndexedDB'); // Add this line for debugging
-      }
-    });
-  }
-  
+  this.indexedDBService.get('cantidades').then(cantidades => {
+    if (cantidades) {
+      this.cantidades = cantidades;
+      console.log('Cantidades cargadas desde IndexedDB:', this.cantidades); // Add this line for debugging
+    } else {
+      console.log('No hay cantidades en IndexedDB'); // Add this line for debugging
+    }
+  });
+}
+
   
 
   cargarProductos(): void {
