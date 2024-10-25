@@ -5,14 +5,14 @@
     </div>
     <div class="bg-neutral-300 p-4">
         <p class="text-sm sm:text-base md:text-lg mb-2">
-            <span class="roboto-bold">PRODUCTOS TOTALES:</span> {{ calcularTotalProductos() }} unidades
+            <span class="roboto-bold">PRODUCTOS TOTALES:</span> {{carritoService.cantidad()}} unidades
         </p>
         <p class="text-sm sm:text-base md:text-lg mb-2">
-            <span class="roboto-bold">PRECIO TOTAL:</span> S/ {{ total.toFixed(2) }}
+            <span class="roboto-bold">PRECIO TOTAL:</span> S/ {{ carritoService.total()}}
         </p>
-        <div *ngFor="let producto of productos">
+        <div *ngFor="let item of listcarrito">
             <p class="text-sm sm:text-base md:text-lg mb-2">
-                <span class="roboto-bold">PRODUCTO:</span> {{ producto.productoNombre }} 
+                <span class="roboto-bold">PRODUCTO:</span> {{ item.producto.productoNombre }} 
             </p>
         </div>
     </div>

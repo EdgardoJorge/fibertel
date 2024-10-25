@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Producto } from '../../../../shared/models/producto';
-import { ProductoService } from '../../../../shared/services/producto.service'; 
+import { ProductoService } from '../../../../shared/services/producto.service';
 import { Marca } from '../../../../shared/models/marca';
 import { MarcaService } from '../../../../shared/services/marca.service';
 import { Categoria } from '../../../../shared/models/Categoria';
 import { CategoriaService } from '../../../../shared/services/Categoria.service';
-import { CarritoService } from '../../../../shared/services/carrito.service'; // Importa CarritoService
+import { IndexedDBService } from '../../../../shared/services/indexed-db.service';
+import { CarritoService } from '../../../../shared/services/carrito.service';
+import { Carrito } from '../../../../shared/models/carrito';
 
 @Component({
   selector: 'app-details',
@@ -15,93 +17,77 @@ import { CarritoService } from '../../../../shared/services/carrito.service'; //
 })
 export class DetailsComponent implements OnInit {
   cargaDatos: 'none' | 'loading' | 'done' | 'error' = 'none';
-  producto!: Producto; // Producto actual
-  marca!: Marca; // Marca del producto
-  categoria!: Categoria; // Categoria del producto
-  carritoIds: string[] = []; // IDs de productos en el carrito
-  productoAnadido: boolean = false; // Indica si el producto fue añadido al carrito
+  producto!: Producto;
+  marca!: Marca;
+  categoria!: Categoria; // Add this line to your component class
+  productoAnadido: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private productoService: ProductoService,
     private marcaService: MarcaService,
     private categoriaService: CategoriaService,
-    private carritoService: CarritoService // Usa CarritoService para manejar el carrito
+    private carritoService : CarritoService,
   ) {}
 
   ngOnInit(): void {
     this.cargaDatos = 'loading';
-    this.carritoIds = this.carritoService.getCarritoIds(); // Carga los IDs del carrito
+   ;
 
     this.route.paramMap.subscribe(params => {
-      const id = params.get('id'); // Obtiene el ID del producto de los parámetros
+      const id = params.get('id');
       if (id) {
-        this.obtenerProducto(id); // Obtiene el producto por ID
+        this.obtenerProducto(id);
       } else {
-        this.cargaDatos = 'error'; // Cambia el estado a error si no hay ID
+        this.cargaDatos = 'error';
       }
     });
   }
 
-  // Método para obtener un producto por su ID
   obtenerProducto(id: string): void {
     this.productoService.getProductoById(id).subscribe({
       next: (data: Producto) => {
-        this.producto = data; // Asigna el producto obtenido
-        this.cargaDatos = 'done'; // Cambia el estado de carga a 'done'
-        // Obtiene la marca y categoría del producto
+        this.producto = data;
+        this.cargaDatos = 'done';
         this.obtenerMarca(this.producto.idMarca.toString());
         this.obtenerCategoria(this.producto.idCategoria.toString());
       },
       error: () => {
-        this.cargaDatos = 'error'; // Cambia el estado a error si hay un fallo
+        this.cargaDatos = 'error';
       }
     });
   }
 
-  // Método para obtener la marca por su ID
   obtenerMarca(idMarca: string): void {
     this.marcaService.getMarcaById(idMarca).subscribe({
       next: (data: Marca) => {
-        this.marca = data; // Asigna la marca obtenida
+        this.marca = data;
       },
       error: () => {
-        console.error('Error al obtener la marca'); // Muestra un error en la consola
+        console.error('Error al obtener la marca');
       }
     });
   }
 
-  // Método para obtener la categoría por su ID
   obtenerCategoria(idCategoria: string): void {
     this.categoriaService.getCategoriaById(idCategoria).subscribe({
       next: (data: Categoria) => {
-        this.categoria = data; // Asigna la categoría obtenida
+        this.categoria = data;
       },
       error: () => {
-        console.error('Error al obtener categoría'); // Muestra un error en la consola
+        console.error('Error al obtener categoría');
       }
     });
   }
 
-  // Método para agregar un producto al carrito
-  agregarAlCarrito(): void {
-    if (this.producto.idProducto) {
-      const carritoIds = this.carritoService.getCarritoIds(); // Obtiene los IDs del carrito
-      const idStr = this.producto.idProducto.toString(); // Convierte el ID a string
-
-      // Verifica si el ID ya está en el carrito
-      if (!carritoIds.includes(idStr)) {
-        this.carritoService.agregarAlCarrito(idStr); // Añade el producto al carrito usando el servicio
-        this.productoAnadido = true; // Indica que se añadió el producto
-        console.log('Producto añadido al carrito:', this.producto.idProducto); // Mensaje en consola
-        
-        // Oculta el mensaje después de 2 segundos
-        setTimeout(() => {
-          this.productoAnadido = false; 
-        }, 2000);
-      } else {
-        console.log('El producto ya está en el carrito'); // Mensaje si ya estaba en el carrito
-      }
+  agregarProducto(item: Producto) {
+    if (item) {
+      this.carritoService.agregar(item, 1); // You can change the quantity as needed
+      this.productoAnadido = true;
+      console.log('Product added to cart:', item);
+    } else {
+      console.error('Product is not defined');
     }
   }
+  
 }

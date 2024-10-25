@@ -1,48 +1,70 @@
 import { Injectable } from '@angular/core';
+import { Carrito } from '../models/carrito';
+import { Producto } from '../models/producto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CarritoService {
-  private carritoIds: string[] = [];
+  private listcarrito: Carrito[] = [];
 
-  constructor() {
-    this.cargarCarrito(); // Cargar el carrito desde sessionStorage al iniciar el servicio
+  getcarrito() {
+    this.obtenerSession(); // Ensure we always get the latest session data
+    return this.listcarrito;
   }
 
-  // Cargar los IDs desde sessionStorage
-  private cargarCarrito(): void {
-    try {
-      const ids = sessionStorage.getItem('carritoIds');
-      this.carritoIds = ids ? JSON.parse(ids) : [];
-      console.log('Carrito cargado:', this.carritoIds);
-    } catch (error) {
-      console.error('Error al cargar el carrito desde sessionStorage:', error);
-      this.carritoIds = []; // Resetea el array en caso de error
-    }
-  }
-
-  // Obtener los IDs del carrito
-  getCarritoIds(): string[] {
-    return this.carritoIds;
-  }
-
-  // Añadir un ID al carrito
-  agregarAlCarrito(id: string): void {
-    console.log('Agregando al carrito ID:', id);
-    if (!this.carritoIds.includes(id)) {
-      this.carritoIds.push(id);
-      sessionStorage.setItem('carritoIds', JSON.stringify(this.carritoIds));
-      console.log('Carrito actualizado:', this.carritoIds);
+  agregar(producto: Producto, cantidad: number = 1) {
+    this.obtenerSession(); // Make sure we have the latest data
+    const index = this.listcarrito.findIndex(item => item.producto.idProducto === producto.idProducto);
+    
+    if (index === -1) {
+      const item = new Carrito(producto, cantidad);
+      this.listcarrito.push(item);
     } else {
-      console.warn(`El ID ${id} ya está en el carrito.`);
+      // Update quantity if item already exists
+      this.actualizar(index, this.listcarrito[index].cantidad + cantidad);
+    }
+    this.guardarSession(); // Save updated cart state
+  }
+
+  actualizar(index: number, cantidad: number) {
+    if (index >= 0 && index < this.listcarrito.length) {
+      this.listcarrito[index].cantidad = cantidad;
+      this.guardarSession(); // Save updated cart state
     }
   }
 
-  // Establecer IDs en el carrito
-  setCarritoIds(ids: string[]): void {
-    this.carritoIds = ids;
-    sessionStorage.setItem('carritoIds', JSON.stringify(ids));
-    console.log('Carrito establecido:', this.carritoIds);
+  cantidad(): number {
+    this.obtenerSession(); // Ensure we have the latest session data
+    return this.listcarrito.reduce((total, item) => total + item.cantidad, 0);
+  }
+
+  total(): number {
+    this.obtenerSession(); // Ensure we have the latest session data
+    return this.listcarrito.reduce((sum, item) => {
+      const precio = item.producto.precioOferta === 0 ? item.producto.precio : item.producto.precioOferta;
+      return sum + precio * item.cantidad;
+    }, 0);
+  }
+
+  eliminar(index: number) {
+    if (index >= 0 && index < this.listcarrito.length) {
+      this.listcarrito.splice(index, 1);
+      this.guardarSession(); // Save updated cart state
+    }
+  }
+
+  guardarSession() {
+    localStorage.setItem('Carrito', JSON.stringify(this.listcarrito));
+  }
+
+  obtenerSession() {
+    this.listcarrito = []; // Clear the existing list
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const carrito = localStorage.getItem('Carrito');
+      if (carrito != null) {
+        this.listcarrito = JSON.parse(carrito);
+      }
+    }
   }
 }

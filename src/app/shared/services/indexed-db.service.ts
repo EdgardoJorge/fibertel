@@ -1,11 +1,10 @@
-// indexed-db.service.ts
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IndexedDBService {
-  private db: IDBDatabase | null = null; // Initialize db with null
+  private db: IDBDatabase | null = null;
   private dbName = 'myDatabase';
   private storeName = 'myStore';
 
@@ -42,7 +41,7 @@ export class IndexedDBService {
       const request = store.get(key);
 
       request.onsuccess = (event) => {
-        resolve((event.target as IDBRequest).result?.value);
+        resolve((event.target as IDBRequest).result);
       };
 
       request.onerror = (event) => {
